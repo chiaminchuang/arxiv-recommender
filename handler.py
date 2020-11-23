@@ -19,7 +19,7 @@ def webhook(event, context):
 
     msg = json.loads(event['body'])
 
-    query = msg['events'][0]['message']['text'].split(',')
+    query = msg['events'][0]['message']['text']
     papers = recommand_randomly(query)
 
     # {"events":[

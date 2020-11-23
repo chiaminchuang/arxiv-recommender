@@ -3,7 +3,8 @@ from bs4 import BeautifulSoup
 from paper import Paper
 
 # sortBy: ['lastUpdatedDate', 'submittedDate']
-BASE_URL = 'http://export.arxiv.org/api/query?search_query={}&start={}&max_results={}&sortBy=submittedDate&sortOrder=ascending'
+# sortOrder: ['descending', 'ascending']
+BASE_URL = 'http://export.arxiv.org/api/query?search_query={}&start={}&max_results={}&sortBy=submittedDate&sortOrder=descending'
 
 # arxiv api document
 # https://arxiv.org/help/api/user-manual#query_details
@@ -20,20 +21,36 @@ RIGHT_PARENS = '%29'
 DOUBLE_QUOTE = '%22'
 
 
+def preprocess_params(url_func):
+    # query: 'summarization,machine translation'
+    # ret: ['summarization', 'machine+translation']
+
+    def _process(query, **kwargs):
+        query = query.split(',')
+        query = [q.strip().replace(' ', '+') for q in query]
+        return url_func(query, **kwargs)
+
+    return _process
+
+
+@preprocess_params
 def construct_url(query, id_list=None, start=0, max_results=5):
+
     ti = LEFT_PARENS + '+OR+'.join(['ti:' + q for q in query]) + RIGHT_PARENS
     abs = LEFT_PARENS + \
         '+AND+'.join(['abs:' + q for q in query]) + RIGHT_PARENS
 
     cat = LEFT_PARENS + '+OR+'.join(['cat:' + c for c in CAT]) + RIGHT_PARENS
 
-    search_query = ti + '+OR+' + '+AND+'.join([abs, cat])
+    search_query = f'{LEFT_PARENS}{ti}+OR+{abs}{RIGHT_PARENS}+AND+{cat}'
+    # search_query = f'{ti}+OR+{abs}+AND+{cat}'
 
     url = BASE_URL.format(search_query, start, max_results)
 
     if id_list:
         url += "&id_list=" + ','.join(id_list)
 
+    print(url)
     return url
 
 
@@ -49,6 +66,7 @@ def recommand_randomly(query):
     return papers
 
 
+recommand_randomly('summarization')
 # 1. get user interests from mysql (create a interest table for each user)
 # 2. use user interests as keywords to search papers through arxiv api
 # 3. send papers messages to SQS

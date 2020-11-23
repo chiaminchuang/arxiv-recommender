@@ -1,0 +1,28 @@
+# Distribution / packaging
+.Python
+*.pyc
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Serverless directories
+.serverless
+
+.vscode/
+
+key
+node_modules/
+package-lock.json
+settings.py

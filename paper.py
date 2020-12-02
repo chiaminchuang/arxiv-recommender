@@ -8,14 +8,28 @@ def clear_text(text):
 
 
 class Paper:
-    def __init__(self, entry):
+    def __init__(self, entry=None, json=None):
 
+        assert (entry or json) and (not entry or not json)
+        self.link = ''
+        self.title = ''
+        self.abstract = ''
+        self.comment = ''
+        self.date = ''
+        self.authors = []
+
+        if entry:
+            self._from_html(entry)
+        if json:
+            self._from_json(json)
+
+    def _from_html(self, entry):
         self.link = clear_text(entry.find(
             'id').string) if entry.find('id') else '-'
         self.title = clear_text(entry.find(
             'title').string) if entry.find('title') else '-'
         self.abstract = clear_text(entry.find(
-            'summary').string[:300]) if entry.find('summary') else '-'
+            'summary').string[:300]) + '...' if entry.find('summary') else '-'
 
         self.comment = clear_text(entry.find(
             'arxiv:comment').string) if entry.find('arxiv:comment') else '-'
@@ -25,6 +39,36 @@ class Paper:
         self.authors = []
         for author in entry.find_all('author'):
             self.authors.append(clear_text(author.find('name').string))
+
+    def _from_json(self, json):
+        self.link = json['link']
+        self.title = json['title']
+        self.abstract = json['abstract']
+        self.comment = json['comment']
+        self.date = json['date']
+        self.authors = json['authors']
+
+    def __repr__(self):
+        return self.get_json()
+
+    def __str__(self):
+        return f'''Paper(
+            title={self.title},
+            summary={self.summary},
+            abstract={self.abstract},
+            authors={self.authors},
+            comment={self.comment},
+            date={self.date})'''
+
+    def get_json(self):
+        return {
+            'link': self.link,
+            'title': self.title,
+            'abstract': self.abstract,
+            'comment': self.comment,
+            'author': self.authors,
+            'date': self.date
+        }
 
     def get_flex_contents(self):
         return {

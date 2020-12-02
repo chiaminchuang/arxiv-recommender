@@ -56,7 +56,7 @@ def construct_url(query, id_list=None, start=0, max_results=5):
 
 def recommand_randomly(query):
 
-    url = construct_url(query)
+    url = construct_url(query, max_results=3)
     res = requests.get(url).content
 
     soup = BeautifulSoup(res, 'html.parser')
@@ -66,7 +66,9 @@ def recommand_randomly(query):
     return papers
 
 
-recommand_randomly('summarization')
+# recommand_randomly('summarization')
+
+
 # 1. get user interests from mysql (create a interest table for each user)
 # 2. use user interests as keywords to search papers through arxiv api
 # 3. send papers messages to SQS
@@ -89,106 +91,7 @@ recommand_randomly('summarization')
 # User line inputs -> SQS 2 -> Lambda 2 -> mysql
 
 
-# {
-#   "type": "carousel",
-#   "contents": [
-#     {
-#       "type": "bubble",
-#       "header": {
-#         "type": "box",
-#         "layout": "vertical",
-#         "contents": [
-#           {
-#             "type": "text",
-#             "text": "Unsupervised Text Style Transfer using Language Models as Discriminators",
-#             "size": "md",
-#             "weight": "bold"
-#           }
-#         ]
-#       },
-#       "hero": {
-#         "type": "box",
-#         "layout": "vertical",
-#         "contents": [
-#           {
-#             "type": "text",
-#             "text": "Zichao Yang, Zhiting Hu, Chris Dyer, Eric P. Xing, Taylor Berg-Kirkpatrick",
-#             "size": "xxs",
-#             "style": "italic",
-#             "margin": "none",
-#             "offsetStart": "xxl"
-#           }
-#         ]
-#       },
-#       "body": {
-#         "type": "box",
-#         "layout": "vertical",
-#         "contents": [
-#           {
-#             "type": "text",
-#             "text": "Binary classifiers are often employed as discriminators in GAN-based unsupervised style transfer systems to ensure that transferred sentences are similar to sentences in the target domain. One difficulty with this approach is that the error signal provided by the discriminator can be unstable and is sometimes insufficient to train the generator to produce fluent language.",
-#             "wrap": true,
-#             "size": "sm",
-#             "offsetEnd": "none"
-#           }
-#         ],
-#         "margin": "none"
-#       },
-#       "footer": {
-#         "type": "box",
-#         "layout": "vertical",
-#         "contents": [
-#           {
-#             "type": "box",
-#             "layout": "vertical",
-#             "contents": [
-#               {
-#                 "type": "text",
-#                 "text": "NeurIPS camera ready",
-#                 "size": "xs",
-#                 "style": "italic",
-#                 "wrap": true,
-#                 "offsetStart": "md"
-#               },
-#               {
-#                 "type": "text",
-#                 "text": "2018-05",
-#                 "size": "xs",
-#                 "style": "italic",
-#                 "offsetStart": "md"
-#               },
-#               {
-#                 "type": "spacer"
-#               }
-#             ]
-#           },
-#           {
-#             "type": "button",
-#             "action": {
-#               "type": "uri",
-#               "label": "Study",
-#               "uri": "http://linecorp.com/"
-#             },
-#             "offsetTop": "none",
-#             "offsetBottom": "none",
-#             "height": "sm",
-#             "style": "primary"
-#           }
-#         ]
-#       },
-#       "styles": {
-#         "footer": {
-#           "separator": false
-#         }
-#       }
-#     },
-#     {
-#       "type": "bubble",
-#       "body": {
-#         "type": "box",
-#         "layout": "vertical",
-#         "contents": []
-#       }
-#     }
-#   ]
-# }
+# Vespa
+
+
+# curl -XPUT -u 'eddie:#Ce140207' 'https://search-arxivrecommender-kqwfiyazbtaxiqupo6zif24pnq.us-east-2.es.amazonaws.com/movies/_doc/1' -d '{"director": "Burton, Tim", "genre": ["Comedy","Sci-Fi"], "year": 1996, "actor": ["Jack Nicholson","Pierce Brosnan","Sarah Jessica Parker"], "title": "Mars Attacks!"}' -H 'Content-Type: application/json'

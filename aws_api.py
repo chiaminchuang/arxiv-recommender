@@ -1,8 +1,9 @@
 from elasticsearch import Elasticsearch, RequestsHttpConnection
 from requests_aws4auth import AWS4Auth
 
-from settings import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_ES_HOST, AWS_ES_REGION
-from arxiv_api import recommand_randomly
+from settings import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_ES_HOST, \
+    AWS_ES_REGION
+# from arxiv_api import recommand_randomly
 
 sort = [
     "_score",
@@ -72,9 +73,14 @@ def es_search(es, size=5):
     # print(res)
 
 
+def es_delete(es):
+    es.indices.delete(index='arxiv')
+# es_delete(es)
+
+
 es = es_connect()
 # keyword = "summarization"
 # papers = recommand_randomly(keyword)
 # papers = [p.get_json() for p in papers]
 # es_index_bulk(es, papers)
-es_search(es)
+# es_search(es)

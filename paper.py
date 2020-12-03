@@ -29,7 +29,7 @@ class Paper:
         self.title = clear_text(entry.find(
             'title').string) if entry.find('title') else '-'
         self.abstract = clear_text(entry.find(
-            'summary').string[:300]) + '...' if entry.find('summary') else '-'
+            'summary').string[:300]) + ' ...' if entry.find('summary') else '-'
 
         self.comment = clear_text(entry.find(
             'arxiv:comment').string) if entry.find('arxiv:comment') else '-'

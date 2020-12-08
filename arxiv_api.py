@@ -160,4 +160,4 @@ arxiv.search('', 5000)
 # Vespa
 
 
-# curl -XPUT -u 'eddie:#Ce140207' 'https://search-arxivrecommender-kqwfiyazbtaxiqupo6zif24pnq.us-east-2.es.amazonaws.com/movies/_doc/1' -d '{"director": "Burton, Tim", "genre": ["Comedy","Sci-Fi"], "year": 1996, "actor": ["Jack Nicholson","Pierce Brosnan","Sarah Jessica Parker"], "title": "Mars Attacks!"}' -H 'Content-Type: application/json'
+# curl -XPUT -u 'username:password' 'https://search-arxivrecommender-kqwfiyazbtaxiqupo6zif24pnq.us-east-2.es.amazonaws.com/movies/_doc/1' -d '{"director": "Burton, Tim", "genre": ["Comedy","Sci-Fi"], "year": 1996, "actor": ["Jack Nicholson","Pierce Brosnan","Sarah Jessica Parker"], "title": "Mars Attacks!"}' -H 'Content-Type: application/json'

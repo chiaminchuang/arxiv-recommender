@@ -3,6 +3,9 @@ from bs4 import BeautifulSoup
 from urllib.parse import urlencode
 import logging
 import time
+import json
+import argparse
+from typing import Callable, List, Dict
 
 from paper import Paper
 
@@ -21,6 +24,7 @@ BASE_URL = 'http://export.arxiv.org/api/query?'
 # cs.CV -> Computer Vision and Pattern Recongnition
 # cs.IR -> Information Retrieval
 CAT = ['cs.AI', 'cs.LG', 'cs.CL', 'cs.CV', 'cs.IR']
+
 # LEFT_PARENS = '%28'
 # RIGHT_PARENS = '%29'
 # DOUBLE_QUOTE = '%22'
@@ -33,11 +37,11 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('arxiv-api')
 
 
-def preprocess_params(url_func):
+def preprocess_params(url_func: Callable):
     # query: 'summarization,machine translation'
     # ret: ['summarization', 'machine+translation']
 
-    def _process(obj, query, **kwargs):
+    def _process(obj, query: str, **kwargs):
         query = query.lower().split(',') if query else []
         query = [q.strip().replace(' ', '+') for q in query]
         return url_func(obj, query, **kwargs)
@@ -46,22 +50,54 @@ def preprocess_params(url_func):
 
 
 class ArxivSearch:
-    def __init__(self, sortBy='submittedDate', sortOrder='descending'):
+    """ Wrapper for arxiv search engine api
 
+    Attritubes:
+        sleep (int): 
+        chunk_size (int):
+        sortBy (str):
+        sortOrder (str):
+
+    """
+
+    def __init__(
+            self, sortBy: str = 'submittedDate', sortOrder: str = 'descending'):
+        """
+        Args:
+            sortBy:
+            sortOrder:  
+        """
         self.sleep = 3
-        self.chunck_size = 1000
+        self.chunk_size = 1000
         self.sortBy = sortBy
         self.sortOrder = sortOrder
 
-    def _process_results(self, res):
+    def get_total_results(self, query: str) -> int:
+        """
+        Args:
+            query:
 
+        Returns:
+            The number of the total results in the query.
+        """
+        url = self.construct_url(query, start=0, max_results=1)
+        res = requests.get(url).content
+        soup = BeautifulSoup(res, 'html.parser')
+
+        return int(soup.find('opensearch:totalresults').string)
+
+    def _process_results(self, url: str) -> List[Dict]:
+
+        res = requests.get(url).content
         soup = BeautifulSoup(res, 'html.parser')
         papers = [Paper(entry=entry) for entry in soup.findAll('entry')]
 
         return [p.get_json() for p in papers]
 
     @preprocess_params
-    def construct_url(self, query, start=0, max_results=5):
+    def construct_url(
+            self, query: List[str],
+            start: int = 0, max_results: int = 0) -> str:
 
         if query:
             ti = [f'ti:{q}' for q in query]
@@ -87,77 +123,76 @@ class ArxivSearch:
 
         url = BASE_URL + urlencode(args)
 
-        logger.info(url)
         return url
 
-    def search(self, query, max_results):
+    def search(self, query: str, max_results: str) -> List[Dict]:
+
+        total = self.get_total_results(query)
+        logger.info(f'The number of total results is {total}')
+        if max_results == -1:
+            max_results = total
 
         papers = []
         logger.info(
             f'Attempt to retrieve papers from arXiv. (query=`{query}`, max_results={max_results})')
+
         while len(papers) < max_results:
             t = time.time()
-            n_results = min(max_results, self.chunck_size) \
-                if max_results != -1 else self.chunck_size
+            n_results = min(max_results, self.chunk_size) \
+                if max_results != -1 else self.chunk_size
             start = len(papers)
 
             url = self.construct_url(query, start=start, max_results=n_results)
-            res = requests.get(url).content
+            logger.info(url)
 
-            _papers = self._process_results(res)
+            _papers = self._process_results(url)
+
+            logger.info(
+                f'Retrieve {len(_papers)} papers in {time.time()-t:.2f} sec. (start={start}, n_results={n_results})\n')
+
             if not _papers:
                 break
 
             papers.extend(_papers)
-            logger.info(
-                f'Retrieve {len(_papers)} papers in {time.time()-t:.2f} sec. (start={start}, n_results={n_results})\n')
+            time.sleep(self.sleep)
 
         papers = papers[:max_results] if max_results != -1 else papers
         logger.info(f'Retrieved {len(papers)} papers in total.')
         return papers
 
-# def recommand_randomly(query):
 
-#     url = construct_url(query, max_results=3)
-#     res = requests.get(url).content
+if __name__ == '__main__':
 
-#     soup = BeautifulSoup(res, 'html.parser')
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '--query', type=str, default='',
+        help='Search query for arxiv paper. Use `,` as separator for multiple query')
+    parser.add_argument('--n', type=int, default=10,
+                        help='The number of returned results')
 
-#     papers = [Paper(entry) for entry in soup.findAll('entry')]
+    args = parser.parse_args()
+    arxiv = ArxivSearch()
+    papers = arxiv.search(args.query, args.n)
 
-#     return papers
+    from aws_api import ESEngine
 
+    es = ESEngine()
+    # es.delete_all()
+    es.index_bulk(papers)
 
-arxiv = ArxivSearch()
-arxiv.search('', 5000)
+    # res = es.search_by_arxiv_id('2012.04623')
+    # print(res)
 
+    # res = es.search('')
+    # for r in res:
+    #     print(r, end='\n\n')
 
-# recommand_randomly('summarization')
+    # es.update(
+    #     {'comment': 'commented updated', 'category': ['xxx']},
+    #     arxiv_id='2012.04623')
 
+    # res = es.search_by_arxiv_id('2012.04623')
+    # print(res)
 
-# 1. get user interests from mysql (create a interest table for each user)
-# 2. use user interests as keywords to search papers through arxiv api
-# 3. send papers messages to SQS
-# 4. SQS trigger Lambda
-# 5. Lambda send papers message to LINE user through LINE Notify
-
-# 6. get feedback or new interests from user
-# 7. update mysql data
-
-
-# Lambda 1: send papers to users
-# Lambda 2: send user interests to mysql
-# SQS 1: receive arxiv.api results and send them Lambda 1
-# SQS 2: receive user inputs from linebot and send them to Lambda 2
-
-# Usecase - Recommend automatically:
-# arxiv.api (crontab) -> SQS 1 -> Lambda 1 -> user line
-
-# Usecase - Update User info:
-# User line inputs -> SQS 2 -> Lambda 2 -> mysql
-
-
-# Vespa
-
-
-# curl -XPUT -u 'eddie:#Ce140207' 'https://search-arxivrecommender-kqwfiyazbtaxiqupo6zif24pnq.us-east-2.es.amazonaws.com/movies/_doc/1' -d '{"director": "Burton, Tim", "genre": ["Comedy","Sci-Fi"], "year": 1996, "actor": ["Jack Nicholson","Pierce Brosnan","Sarah Jessica Parker"], "title": "Mars Attacks!"}' -H 'Content-Type: application/json'
+    with open('papers.json', 'w') as f:
+        json.dump(papers, f)

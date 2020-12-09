@@ -1,0 +1,17 @@
+{
+  "_index": "arxiv",
+  "_type": "_doc",
+  "_id": "_z2XRnYBPkEJQKxn8Tzg",
+  "_score": 0.2876821,
+  "_source": {
+    "arxiv_id": "2012.04623",
+    "link": "http://arxiv.org/abs/2012.04623v1",
+    "title": "Study on the Assessment of the Quality of Experience of Streaming Video",
+    "abstract": "Dynamic adaptive streaming over HTTP provides the work of most multimedia services, however, the nature of this technology further complicates the assessment of the QoE (Quality of Experience). In this paper, the influence of various objective factors on the subjective estimation of the QoE of streaming video is studied. The paper presents standard and handcrafted features, shows their correlation and p-Value of significance. VQA (Video Quality Assessment) models based on regression and gradient boosting with SRCC reaching up to 0.9647 on the validation subsample are proposed. The proposed regression models are adapted for applied applications (both with and without a reference video); the Gradient Boosting Regressor model is perspective for further improvement of the quality estimation model. We take SQoE-III database, so far the largest and most realistic of its kind. The VQA (video quality assessment) models are available at https://github.com/AleksandrIvchenko/QoE-assesment",
+    "author": ["Aleksandr Ivchenko", "Pavel Kononyuk", "Alexander Dvorkovich", "Liubov Antiufrieva"],
+    "comment": "11 pages, 16 figures, 7 tables",
+    "category": ["cs.MM", "cs.LG"],
+    "date": "2020-12"
+  },
+  "sort": [0.2876821, 1606780800000]
+}

@@ -26,3 +26,5 @@ key
 node_modules/
 package-lock.json
 settings.py
+
+papers.json

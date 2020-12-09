@@ -3,7 +3,7 @@ import re
 
 def clear_text(text):
     text = text.strip()
-    text = re.sub(r'[\r|\n]', '', text)
+    text = re.sub(r'\s+', ' ', text)
     return text
 
 
@@ -11,6 +11,7 @@ class Paper:
     def __init__(self, entry=None, json=None):
 
         assert (entry or json) and (not entry or not json)
+        self.arxiv_id = ''
         self.link = ''
         self.title = ''
         self.abstract = ''
@@ -24,15 +25,23 @@ class Paper:
             self._from_json(json)
 
     def _from_html(self, entry):
-        self.link = clear_text(entry.find(
-            'id').string) if entry.find('id') else '-'
+
+        # _id = http://arxiv.org/abs/2012.03930v1
+        _id = entry.find('id').string
+
+        # 2012.03930
+        self.arxiv_id = re.search(
+            r'([\d|.]+)[v|\d]+', _id, re.IGNORECASE).group(1)
+        self.link = _id
+
         self.title = clear_text(entry.find(
             'title').string) if entry.find('title') else '-'
         self.abstract = clear_text(entry.find(
-            'summary').string[:300]) + ' ...' if entry.find('summary') else '-'
+            'summary').string) if entry.find('summary') else '-'
 
         self.comment = clear_text(entry.find(
             'arxiv:comment').string) if entry.find('arxiv:comment') else '-'
+        self.category = [e.attrs['term'] for e in entry.find_all('category')]
         self.date = clear_text(entry.find(
             'published').string[:7]) if entry.find('published') else '-'
 
@@ -53,20 +62,25 @@ class Paper:
 
     def __str__(self):
         return f'''Paper(
+            arxiv_id={self.arxiv_id},
+            link={self.link},
             title={self.title},
             summary={self.summary},
             abstract={self.abstract},
             authors={self.authors},
             comment={self.comment},
+            category={','.join(self.category)},
             date={self.date})'''
 
     def get_json(self):
         return {
+            'arxiv_id': self.arxiv_id,
             'link': self.link,
             'title': self.title,
             'abstract': self.abstract,
-            'comment': self.comment,
             'author': self.authors,
+            'comment': self.comment,
+            'category': self.category,
             'date': self.date
         }
 
@@ -104,7 +118,7 @@ class Paper:
                 "contents": [
                     {
                         "type": "text",
-                        "text": self.abstract,
+                        "text": self.abstract[:300] + ' ...',
                         "wrap": True,
                         "size": "sm"
                     }

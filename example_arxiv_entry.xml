@@ -1,0 +1,56 @@
+<entry>
+  <id>http://arxiv.org/abs/2012.03930v1</id>
+  <updated>2020-12-07T18:59:08Z</updated>
+  <published>2020-12-07T18:59:08Z</published>
+  <title>Identity-Driven DeepFake Detection</title>
+  <summary>  DeepFake detection has so far been dominated by ``artifact-driven'' methods
+and the detection performance significantly degrades when either the type of
+image artifacts is unknown or the artifacts are simply too hard to find. In
+this work, we present an alternative approach: Identity-Driven DeepFake
+Detection. Our approach takes as input the suspect image/video as well as the
+target identity information (a reference image or video). We output a decision
+on whether the identity in the suspect image/video is the same as the target
+identity. Our motivation is to prevent the most common and harmful DeepFakes
+that spread false information of a targeted person. The identity-based approach
+is fundamentally different in that it does not attempt to detect image
+artifacts. Instead, it focuses on whether the identity in the suspect
+image/video is true. To facilitate research on identity-based detection, we
+present a new large scale dataset ``Vox-DeepFake", in which each suspect
+content is associated with multiple reference images collected from videos of a
+target identity. We also present a simple identity-based detection algorithm
+called the OuterFace, which may serve as a baseline for further research. Even
+trained without fake videos, the OuterFace algorithm achieves superior
+detection accuracy and generalizes well to different DeepFake methods, and is
+robust with respect to video degradation techniques -- a performance not
+achievable with existing detection algorithms.
+  </summary>
+  <author>
+    <name>Xiaoyi Dong</name>
+  </author>
+  <author>
+    <name>Jianmin Bao</name>
+  </author>
+  <author>
+    <name>Dongdong Chen</name>
+  </author>
+  <author>
+    <name>Weiming Zhang</name>
+  </author>
+  <author>
+    <name>Nenghai Yu</name>
+  </author>
+  <author>
+    <name>Dong Chen</name>
+  </author>
+  <author>
+    <name>Fang Wen</name>
+  </author>
+  <author>
+    <name>Baining Guo</name>
+  </author>
+  <link href="http://arxiv.org/abs/2012.03930v1" rel="alternate" type="text/html"/>
+  <link title="pdf" href="http://arxiv.org/pdf/2012.03930v1" rel="related" type="application/pdf"/>
+  <arxiv:primary_category xmlns:arxiv="http://arxiv.org/schemas/atom" term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+  <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+</entry>
+<entry>

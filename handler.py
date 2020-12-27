@@ -8,19 +8,23 @@ from linebot.models import (
 )
 
 from settings import CHANNEL_ACCESS_TOKEN, CHANNEL_SECRET
-from arxiv_api import recommand_randomly
+from aws_api import ESEngine
+from paper import Paper
+
+es = ESEngine()
 
 
 def webhook(event, context):
     # receive user input
 
     linebot = LineBotApi(CHANNEL_ACCESS_TOKEN)
-    handler = WebhookHandler(CHANNEL_SECRET)
+    # handler = WebhookHandler(CHANNEL_SECRET)
 
     msg = json.loads(event['body'])
 
     query = msg['events'][0]['message']['text']
-    papers = recommand_randomly(query)
+    papers = es.search(query, ['title', 'abstract'])
+    papers = [Paper(json=p) for p in papers]
 
     # {"events":[
     #   {"type":"message","replyToken":"a5d6dadb84a346428bc53ea9ce656cea", "message":{"type":"text","id":"13044610237128","text":"yo"}}
@@ -31,7 +35,7 @@ def webhook(event, context):
         p.get_flex_contents() for p in papers]}
 
     linebot.reply_message(reply_token, FlexSendMessage(
-        alt_text='hello',
+        alt_text=f'papers for {query}',
         contents=contents
     ))
 

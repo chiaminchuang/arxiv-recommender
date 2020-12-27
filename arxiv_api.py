@@ -1,3 +1,4 @@
+from aws_api import ESEngine
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urlencode
@@ -125,12 +126,16 @@ class ArxivSearch:
 
         return url
 
-    def search(self, query: str, max_results: str) -> List[Dict]:
+    def search(self, query: str, max_results: int) -> List[Dict]:
+
+        # es = ESEngine()
 
         total = self.get_total_results(query)
         logger.info(f'The number of total results is {total}')
+
         if max_results == -1:
             max_results = total
+        max_results = min(max_results, total)
 
         papers = []
         logger.info(
@@ -150,10 +155,13 @@ class ArxivSearch:
             logger.info(
                 f'Retrieve {len(_papers)} papers in {time.time()-t:.2f} sec. (start={start}, n_results={n_results})\n')
 
-            if not _papers:
-                break
+            # if not _papers:
+            #     break
+            # if _papers:
+                # es.index_bulk(_papers)
 
             papers.extend(_papers)
+
             time.sleep(self.sleep)
 
         papers = papers[:max_results] if max_results != -1 else papers
@@ -174,11 +182,9 @@ if __name__ == '__main__':
     arxiv = ArxivSearch()
     papers = arxiv.search(args.query, args.n)
 
-    from aws_api import ESEngine
-
-    es = ESEngine()
+    # es = ESEngine()
     # es.delete_all()
-    es.index_bulk(papers)
+    # es.index_bulk(papers)
 
     # res = es.search_by_arxiv_id('2012.04623')
     # print(res)

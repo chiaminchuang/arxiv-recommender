@@ -17,7 +17,7 @@ class Paper:
         self.abstract = ''
         self.comment = ''
         self.date = ''
-        self.authors = []
+        self.author = []
 
         if entry:
             self._from_html(entry)
@@ -45,29 +45,37 @@ class Paper:
         self.date = clear_text(entry.find(
             'published').string[:7]) if entry.find('published') else '-'
 
-        self.authors = []
+        self.author = []
         for author in entry.find_all('author'):
-            self.authors.append(clear_text(author.find('name').string))
+            self.author.append(clear_text(author.find('name').string))
 
     def _from_json(self, json):
         self.link = json['link']
         self.title = json['title']
         self.abstract = json['abstract']
         self.comment = json['comment']
+        self.category = json['category']
         self.date = json['date']
-        self.authors = json['authors']
+        self.author = json['author']
 
     def __repr__(self):
-        return self.get_json()
+        return f'''Paper(
+            arxiv_id={self.arxiv_id},
+            link={self.link},
+            title={self.title},
+            abstract={self.abstract},
+            author={self.author},
+            comment={self.comment},
+            category={','.join(self.category)},
+            date={self.date})'''
 
     def __str__(self):
         return f'''Paper(
             arxiv_id={self.arxiv_id},
             link={self.link},
             title={self.title},
-            summary={self.summary},
             abstract={self.abstract},
-            authors={self.authors},
+            author={self.author},
             comment={self.comment},
             category={','.join(self.category)},
             date={self.date})'''
@@ -78,7 +86,7 @@ class Paper:
             'link': self.link,
             'title': self.title,
             'abstract': self.abstract,
-            'author': self.authors,
+            'author': self.author,
             'comment': self.comment,
             'category': self.category,
             'date': self.date
@@ -105,7 +113,7 @@ class Paper:
                 "contents": [
                     {
                         "type": "text",
-                        "text": ', '.join(self.authors),
+                        "text": ', '.join(self.author),
                         "size": "xxs",
                         "style": "italic",
                         "offsetStart": "xxl"

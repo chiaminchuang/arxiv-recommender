@@ -6,6 +6,8 @@ from typing import List, Dict
 from settings import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_ES_HOST, \
     AWS_ES_REGION
 
+from paper import Paper
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('aws-api')
 
@@ -65,7 +67,7 @@ class ESEngine:
             body.append(doc)
 
         res = self.es.bulk(doc_type='doc', body=body)
-        logger.info(res)
+        # logger.info(res)
 
     def search(
             self, query: str, fields: List[str] = ['abstract'],
@@ -88,7 +90,11 @@ class ESEngine:
             "sort": self.sort
         }
         res = self.es.search(index='arxiv', body=body, size=size)
+
+        # check the example_es_search_response for returned details
         res = res['hits']['hits']
+
+        res = [r['_source'] for r in res]
 
         return res
 
@@ -130,15 +136,20 @@ class ESEngine:
         self.es.indices.delete(index='arxiv')
 
 
-# es = ESEngine()
+if __name__ == '__main__':
+
+    es = ESEngine()
+    papers = es.search('summarization', ['abstract'])
+    papers = [Paper(json=p) for p in papers]
+    print(papers)
 
 # es
-        # es = es_connect()
-        # es_delete(es)
+# es = es_connect()
+# es_delete(es)
 
-        # es = es_connect()
-        # keyword = "summarization"
-        # papers = recommand_randomly(keyword)
-        # papers = [p.get_json() for p in papers]
-        # es_index_bulk(es, papers)
-        # es_search(es)
+# es = es_connect()
+# keyword = "summarization"
+# papers = recommand_randomly(keyword)
+# papers = [p.get_json() for p in papers]
+# es_index_bulk(es, papers)
+# es_search(es)

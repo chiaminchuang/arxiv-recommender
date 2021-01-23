@@ -1,14 +1,14 @@
-from aws_api import ESEngine
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urlencode
 import logging
 import time
-import json
-import argparse
+# import json
+# import argparse
 from typing import Callable, List, Dict
 
-from paper import Paper
+# from src.aws_api import ESEngine
+from src.paper import Paper
 
 # sortBy: ['relevance', 'lastUpdatedDate', 'submittedDate']
 # sortOrder: ['descending', 'ascending']
@@ -69,6 +69,7 @@ class ArxivSearch:
             sortOrder:  
         """
         self.sleep = 3
+        self.max_timeout = 10
         self.chunk_size = 1000
         self.sortBy = sortBy
         self.sortOrder = sortOrder
@@ -128,10 +129,8 @@ class ArxivSearch:
 
     def search(self, query: str, max_results: int) -> List[Dict]:
 
-        # es = ESEngine()
-
         total = self.get_total_results(query)
-        logger.info(f'The number of total results is {total}')
+        logger.info(f'The number of the total results is {total}')
 
         if max_results == -1:
             max_results = total
@@ -141,8 +140,10 @@ class ArxivSearch:
         logger.info(
             f'Attempt to retrieve papers from arXiv. (query=`{query}`, max_results={max_results})')
 
+        timeout = 0
         while len(papers) < max_results:
             t = time.time()
+
             n_results = min(max_results, self.chunk_size) \
                 if max_results != -1 else self.chunk_size
             start = len(papers)
@@ -153,14 +154,18 @@ class ArxivSearch:
             _papers = self._process_results(url)
 
             logger.info(
-                f'Retrieve {len(_papers)} papers in {time.time()-t:.2f} sec. (start={start}, n_results={n_results})\n')
+                f'Retrieved {len(_papers)} papers in {time.time()-t:.2f} sec. (start={start}, n_results={n_results})\n')
 
-            # if not _papers:
-            #     break
-            # if _papers:
-                # es.index_bulk(_papers)
-
-            papers.extend(_papers)
+            if _papers:
+                papers.extend(_papers)
+                timeout = 0  # Reset timeout
+            elif timeout == self.max_timeout:
+                logger.info('Exceeded maximum timeout and stopped retrieving.')
+                break
+            else:
+                # Retrieved 0 papers. Retry.
+                timeout += 1
+                logger.info(f'Retry {timeout} time(s).')
 
             time.sleep(self.sleep)
 
@@ -169,18 +174,18 @@ class ArxivSearch:
         return papers
 
 
-if __name__ == '__main__':
+# if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        '--query', type=str, default='',
-        help='Search query for arxiv paper. Use `,` as separator for multiple query')
-    parser.add_argument('--n', type=int, default=10,
-                        help='The number of returned results')
+#     parser = argparse.ArgumentParser()
+#     parser.add_argument(
+#         '--query', type=str, default='',
+#         help='Search query for arxiv paper. Use `,` as separator for multiple query')
+#     parser.add_argument('--n', type=int, default=10,
+#                         help='The number of returned results')
 
-    args = parser.parse_args()
-    arxiv = ArxivSearch()
-    papers = arxiv.search(args.query, args.n)
+#     args = parser.parse_args()
+#     arxiv = ArxivSearch()
+#     papers = arxiv.search(args.query, args.n)
 
     # es = ESEngine()
     # es.delete_all()
@@ -200,5 +205,5 @@ if __name__ == '__main__':
     # res = es.search_by_arxiv_id('2012.04623')
     # print(res)
 
-    with open('papers.json', 'w') as f:
-        json.dump(papers, f)
+    # with open('papers.json', 'w') as f:
+    #     json.dump(papers, f)

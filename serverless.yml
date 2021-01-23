@@ -9,7 +9,6 @@
 # For full config options, check the docs:
 #    docs.serverless.com
 #
-# Happy Coding!
 
 service: arxivrecommender
 # app and org for use with dashboard.serverless.com

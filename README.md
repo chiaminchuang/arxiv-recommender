@@ -1,6 +1,6 @@
 # Arxiv Recommender - Linebot
 
-An arxiv paper recommendation system built with Amazon `Lambda` and `Elasticsearch` through `Linebot`.
+An arxiv paper recommendation `Linebot` system built with Amazon `Lambda` and `Elasticsearch`.
 
 ## Table of Contents
 
@@ -14,8 +14,12 @@ An arxiv paper recommendation system built with Amazon `Lambda` and `Elasticsear
 
 ### Arxiv API
 
-arXiv is an open-access service created for 1M+ scholarly articles in the fields of physics, mathematics, computer science, etc., and is maintained by Cornell University. <p>
-I downloaded the arXiv papers through official arXiv API (arxiv_api.py) and stored them into Elasticsearch hosted on AWS. I restricted the category in `['cs.AI', 'cs.LG', 'cs.CL', 'cs.CV', 'cs.IR'] `because of my personal interests.
+<p>
+  arXiv is an open-access service created for 1M+ scholarly articles in the fields of physics, mathematics, computer science, etc., and is maintained by Cornell University. 
+</p>
+<p>
+  I downloaded the arXiv papers through official arXiv API (arxiv_api.py) and stored them into Elasticsearch hosted on AWS. I restricted the paper categories to `['cs.AI', 'cs.LG', 'cs.CL', 'cs.CV', 'cs.IR']` because of my personal interests.
+<p>
 
 | code         | category                                |
 | ------------ | --------------------------------------- |
@@ -23,13 +27,22 @@ I downloaded the arXiv papers through official arXiv API (arxiv_api.py) and stor
 | cs</span>.LG | Machine Learning                        |
 | cs</span>.CL | Computation and Language                |
 | cs</span>.CV | Computer Vision and Pattern Recognition |
-| cs</span>.IR | Information Theory                      |
+| cs</span>.IR | Information Retrieval                   |
 
 ### Linebot
 
-I used Linebot as user interface for the convience. You can check the interesting papers anytime and anywhere. Linebot API was deployed using AWS Lambda, a serverless compute service.
+<p>
+  I used Linebot as user interface for the convience. You can check the interesting papers anytime and anywhere. Linebot API was deployed using AWS Lambda, a serverless compute service. I customized the Line message layout with Flex Message, based on specification for CSS Flexible Box.
+</p>
 
 ### Elasticsearch
+
+<!-- <p>
+  Elasticsearch is a distributed, RESTful search and analytics engine. I
+</p> -->
+<p>
+  The below is an example document for this project.
+</p>
 
 ```json
 {
@@ -54,7 +67,10 @@ I used Linebot as user interface for the convience. You can check the interestin
 
 ## Setup
 
+Configure your Lambda Service with `serverless.yml`.
+
 ```
+// make sure your aws user has the access permission of Lambda, S3, CloudfFormation and Elasticsearch.
 set AWS_ACCESS_KEY_ID=YOUR_AWS_KEY
 set AWS_SECRET_ACCESS_KEY=YOUR_AWS_SECRET_KEY
 
@@ -70,3 +86,4 @@ Simply type the keyword you're interested in. Use **comma** as separator for mul
 ## Reference
 
 - [arxiv api](#https://arxiv.org/help/api/user-manual)
+- [Flex Message](#https://developers.line.biz/en/docs/messaging-api/using-flex-messages/)

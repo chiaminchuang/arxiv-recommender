@@ -16,9 +16,17 @@ if __name__ == '__main__':
 
     arxiv = ArxivSearch()
     papers = arxiv.search(args.query, args.n)
+    # papers[0]['abstract'] = 'a'
+    # papers[1]['abstract'] = 'b'
+
+    # print(papers)
 
     es = ESEngine()
     es.index_bulk(papers)
+    # res = es.search('', fields=['title', 'abstract'], size=3001)
+    # print(len(res))
+
+    # es.index(papers[-1])
 
     # es.search('summarization', fields=['title', 'abstract'], size=2)
 

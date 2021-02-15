@@ -82,6 +82,7 @@ class Paper:
 
     def get_json(self):
         return {
+            # '_id': self.arxiv_id,
             'arxiv_id': self.arxiv_id,
             'link': self.link,
             'title': self.title,
@@ -165,7 +166,8 @@ class Paper:
                         "action": {
                             "type": "uri",
                             "label": "Study",
-                            "uri": self.link
+                            "uri": self.link,
+                            # "data": f"token={token}"
                         },
                         "height": "sm",
                         "style": "primary"

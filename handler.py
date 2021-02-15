@@ -4,8 +4,9 @@ from linebot import (
     LineBotApi, WebhookHandler
 )
 from linebot.models import FlexSendMessage, TextSendMessage
+from linebot.exceptions import LineBotApiError
 
-from settings import CHANNEL_ACCESS_TOKEN, CHANNEL_SECRET
+from settings import CHANNEL_ACCESS_TOKEN, CHANNEL_SECRET, USER_ID
 from src.aws_api import ESEngine
 from src.paper import Paper
 
@@ -13,6 +14,27 @@ es = ESEngine()
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('lambda-handler')
+
+
+def weekly_papers(event, context):
+    print(event)
+    print(context)
+
+    linebot = LineBotApi(CHANNEL_ACCESS_TOKEN)
+
+    papers = es.random_search(size=5)
+    papers = [Paper(json=p) for p in papers]
+
+    contents = {'type': 'carousel', 'contents': [
+                p.get_flex_contents() for p in papers]}
+
+    try:
+        linebot.push_message(USER_ID, FlexSendMessage(
+            alt_text='Weekly Papers',
+            contents=contents
+        ))
+    except LineBotApiError as e:
+        print(e)
 
 
 def webhook(event, context):
@@ -28,8 +50,6 @@ def webhook(event, context):
     # ]}
     events = json.loads(event['body'])['events']
     for e in events:
-        print(e)
-
         reply_token = e['replyToken']
         text = e['message']['text'].strip()
 
@@ -48,26 +68,13 @@ def webhook(event, context):
             linebot.reply_message(reply_token,
                                   TextSendMessage(text='Results Not Found'))
 
-    # query = msg['events'][0]['message']['text']
-    # papers = es.search(query, ['title', 'abstract'])
-    # papers = [Paper(json=p) for p in papers]
-
-    # {"events":[
-    #   {"type":"message","replyToken":"a5d6dadb84a346428bc53ea9ce656cea", "message":{"type":"text","id":"13044610237128","text":"yo"}}
-    # ]}
-    # reply_token = msg['events'][0]['replyToken']
-
-    # contents = {'type': 'carousel', 'contents': [
-    #     p.get_flex_contents() for p in papers]}
-
-    # linebot.reply_message(reply_token, FlexSendMessage(
-    #     alt_text=f'papers for {query}',
-    #     contents=contents
-    # ))
-
     response = {
         'statusCode': 200,
         'body': json.dumps({'message': 'ok'})
     }
 
     return response
+
+
+# if __name__ == '__main__':
+#     push()
